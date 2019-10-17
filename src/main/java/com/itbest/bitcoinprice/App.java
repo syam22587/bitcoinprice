@@ -13,16 +13,20 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
-
 import org.json.JSONObject;
 
 /**
- * Hello world!
+ * This Application retrieves Bit coin price from and external API.
  *
+ * Author : Syam Voleti
  */
+
 public class App {
 
 	public static void main(String[] args) {
+		
+		// Supported Currency Format 
+		String currencyFileJson = args[0] ; 
 
 		String currencyCode; // Declare a currency code ;
 
@@ -30,7 +34,7 @@ public class App {
 		HashMap<String, String> countryMap = new HashMap<String, String>();
 
 		// Loading all available countries to provide Currency validation
-		countryMap = UtilClass.loadCurrencyJson();
+		countryMap = UtilClass.loadCurrencyJson(currencyFileJson);
 
 		// Initialize a scanner to receive inputs
 		@SuppressWarnings("resource")
@@ -62,14 +66,43 @@ public class App {
 
 	private static void getBitCoinPriceDetails(String currencyCode) {
 
-		// URL for Currency specific API
-		String currencyURL = "https://api.coindesk.com/v1/bpi/historical/close.json?currency=" + currencyCode;
+		// URL for current price
+		String currentPriceURL = "https://api.coindesk.com/v1/bpi/currentprice/" + currencyCode + ".json";
 
 		try {
-			JSONObject json = new JSONObject(IOUtils.toString(new URL(currencyURL), Charset.forName("UTF-8")));
+			JSONObject currentPriceJson = new JSONObject(
+					IOUtils.toString(new URL(currentPriceURL), Charset.forName("UTF-8")));
+			// System.out.println(currentPriceJson);
 
 			// retrieve all key value pairs from bpi element node
-			JSONObject test = (JSONObject) json.get("bpi");
+			JSONObject bpiJsonObject = (JSONObject) currentPriceJson.get("bpi");
+
+			// now get the currency specific Bitcoin price
+			JSONObject currencyNode = (JSONObject) bpiJsonObject.get(currencyCode);
+
+			// Get the extact Bit coin price rate
+			Double bcPrice = (Double) currencyNode.get("rate_float");
+
+			System.out.println("Current Price of Bitcoin in \"  " + currencyCode + " \" currency is : \"" + bcPrice
+					+ " " + currencyCode + " \"");
+
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+		} catch (MalformedURLException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		// URL for Currency specific API which fetches last one month data
+		String historicPriceListURL = "https://api.coindesk.com/v1/bpi/historical/close.json?currency=" + currencyCode;
+
+		try {
+			JSONObject historcalJsonData = new JSONObject(
+					IOUtils.toString(new URL(historicPriceListURL), Charset.forName("UTF-8")));
+
+			// retrieve all key value pairs from bpi element node
+			JSONObject test = (JSONObject) historcalJsonData.get("bpi");
 
 			// Declare a Map to store Date/Price key values.
 			Map<String, Double> dataMap = new HashMap<String, Double>();
@@ -100,9 +133,9 @@ public class App {
 			// Retrieve lowest and highest prices.
 
 			System.out.println("The Lowest price in last 31 days is recorded on \" " + mapArray[0].getKey()
-					+ " \" and the value is : \" " + mapArray[0].getValue() + " " + currencyCode + " \" ");
+					+ " \" and the value is : \"" + mapArray[0].getValue() + " " + currencyCode + " \" ");
 			System.out.println("The Highest price in last 31 days is recorded on \" " + mapArray[len - 1].getKey()
-					+ " \" and the value is : \" " + mapArray[len - 1].getValue() + " " + currencyCode + " \" ");
+					+ " \" and the value is : \"" + mapArray[len - 1].getValue() + " " + currencyCode + " \" ");
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

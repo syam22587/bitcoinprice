@@ -26,7 +26,7 @@ public class UtilClass {
 	// this class is created for extra utility activities.
 
 	@SuppressWarnings("unchecked")
-	public static HashMap<String, String> loadCurrencyJson() {
+	public static HashMap<String, String> loadCurrencyJson(String currencyFileJson) {
 
 		// Initialize an empty HashMap
 		HashMap<String, String> countryMap = new HashMap<String, String>();
@@ -35,7 +35,7 @@ public class UtilClass {
 		JSONParser parser = new JSONParser();
 
 		try {
-			Object obj = parser.parse(new FileReader("src\\main\\resources\\supportedcurrencies.json"));
+			Object obj = parser.parse(new FileReader(currencyFileJson));
 
 			// Object is converted as a JSONArray.
 			JSONArray array = (JSONArray) obj;
